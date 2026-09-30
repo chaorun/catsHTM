@@ -1,2 +1,2 @@
-__version__='0.2.2'
+__version__='0.2.5'
 from .script import * #import all functions from the __all__ in script.py, the moment you do import catsHTM 

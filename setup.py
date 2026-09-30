@@ -14,7 +14,7 @@ setup(
     url='https://github.com/chaorun/catsHTM',
 
     author='Maayane T. Soumagnac, Eran O. Ofek',
-    author_email='maayane.soumagnac@weizmann.ac.il',
+    #author_email='maayane.soumagnac@weizmann.ac.il',
     maintainer='Tianrui Sun',
 
     license='Apache-2.0',

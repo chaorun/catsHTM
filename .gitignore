@@ -5,3 +5,11 @@
 .DS_Store_REMOTE_71554
 .DS_Store.orig
 .DS_Store
+matlabfiles
+*.egg-info/
+build/
+dist/
+.eggs/
+__pycache__/
+*.py[cod]
+
