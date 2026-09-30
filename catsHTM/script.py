@@ -345,8 +345,23 @@ def search_htm_ind(Filename,Long,Lat,Radius,path,VarName=None,CatDir=None,verbos
 
                     """
     if VarName==None:
-        cat_name=Filename.split('_')[0]
-        VarName=cat_name+'_HTM'
+        base = os.path.basename(Filename)
+
+        if base.endswith('_htm.hdf5'):
+            cat_name = base[:-len('_htm.hdf5')]
+        else:
+            cat_name = os.path.splitext(base)[0]
+
+        NewVarName = cat_name + '_HTM'
+        OldVarName = base.split('_')[0] + '_HTM'
+
+        # 优先新规则；如果文件里没有，再兼容旧规则
+        if NewVarName in FileHandle:
+            VarName = NewVarName
+        elif OldVarName in FileHandle:
+            VarName = OldVarName
+        else:
+            VarName = NewVarName
 
     if VarName not in list(d.values()):
         if verbose==True:
