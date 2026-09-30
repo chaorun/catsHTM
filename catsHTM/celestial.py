@@ -51,8 +51,10 @@ def cone_in_polysphere(PolesLong,PolesLat,Long,Lat,Radius):
 
 def sphere_distance_fast(RA_1,Dec_1,RA_2,Dec_2):#RADIANS!
 
-    Dist = np.arccos(np.sin(Dec_1)*np.sin(Dec_2) + np.cos(Dec_1)* np.cos(Dec_2)* np.cos(RA_1 - RA_2))
-
+    #Dist = np.arccos(np.sin(Dec_1)*np.sin(Dec_2) + np.cos(Dec_1)* np.cos(Dec_2)* np.cos(RA_1 - RA_2))
+    CosDist = np.sin(Dec_1)*np.sin(Dec_2) + np.cos(Dec_1)*np.cos(Dec_2)*np.cos(RA_1 - RA_2)
+    CosDist = np.clip(CosDist,-1.0,1.0)
+    Dist = np.arccos(CosDist)
     return Dist
 
 def sphere_dist_fast(RA_1,Dec_1,RA_2,Dec_2):#used by xmatch_2cats and match_cats

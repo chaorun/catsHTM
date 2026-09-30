@@ -72,9 +72,11 @@ def get_CatDir(CatName):
         CatDir='./ZTF/SrcLCDR1'
     elif CatName=='ztfDR1var':
         CatDir = './ZTF/ztfDR1var'
-    elif CatName not in ['AKARI', 'APASS', 'Cosmos', 'FIRST', 'NVSS', 'PS1', 'PTFpc', 'PGC', 'ROSATfsc', 'SkyMapper', 'UCAC4',
-                         'WISE', 'XMM','NOAO']:
-        raise ValueError('you need to specify a valid name for the catalog (see README file for list of available catalogs and names)')
+    elif CatName=='ATLASREFCAT2':
+        CatDir = 'ATLASREFCAT2'
+    #elif CatName not in ['AKARI', 'APASS', 'Cosmos', 'FIRST', 'NVSS', 'PS1', 'PTFpc', 'PGC', 'ROSATfsc', 'SkyMapper', 'UCAC4',
+    #                     'WISE', 'XMM','NOAO']:
+    #    raise ValueError('you need to specify a valid name for the catalog (see README file for list of available catalogs and names)')
     else:
         CatDir = CatName
     return CatDir
@@ -147,18 +149,63 @@ def cone_search(CatName,RA,Dec,Radius,catalogs_dir='./data',RadiusUnits='arcsec'
             print('INFO: the cone does not intercept the catalog')
         cat_onlycone=np.array([])
     else:
+        #FileName_0 = CatFileTemplate % (CatName, FileID[0])
+        #DataName_0 = htmTemplate % ID_matlab[0]
+        #cat = class_HDF5.HDF5(root_to_data + CatDir + '/' + FileName_0).load(DataName_0, numpy_array=True).T
+        #print('shape of cat is',np.shape(cat))
+        #for Iid in range(Nid)[1:]:
+        #    FileName=CatFileTemplate % (CatName, FileID[Iid])
+        #    DataName=htmTemplate % ID_matlab[Iid]
+
+        #    cat=np.vstack((cat, class_HDF5.HDF5(root_to_data + CatDir + '/' + FileName).load(DataName, numpy_array=True).T))
+        #if OnlyCone==True:
+        #D=celestial.sphere_distance_fast(RA,Dec,cat[:,ColRa],cat[:,ColDec])#[0]
+        #cat_onlycone=cat[D<Radius,:]
         FileName_0 = CatFileTemplate % (CatName, FileID[0])
         DataName_0 = htmTemplate % ID_matlab[0]
-        cat = class_HDF5.HDF5(root_to_data + CatDir + '/' + FileName_0).load(DataName_0, numpy_array=True).T
-        #print('shape of cat is',np.shape(cat))
-        for Iid in range(Nid)[1:]:
-            FileName=CatFileTemplate % (CatName, FileID[Iid])
-            DataName=htmTemplate % ID_matlab[Iid]
 
-            cat=np.vstack((cat, class_HDF5.HDF5(root_to_data + CatDir + '/' + FileName).load(DataName, numpy_array=True).T))
-        #if OnlyCone==True:
-        D=celestial.sphere_distance_fast(RA,Dec,cat[:,ColRa],cat[:,ColDec])#[0]
-        cat_onlycone=cat[D<Radius,:]
+        cat = class_HDF5.HDF5(
+            root_to_data + CatDir + '/' + FileName_0
+        ).load(DataName_0, numpy_array=True)
+
+        IsCompound = (
+            isinstance(cat, np.ndarray)
+            and cat.dtype.names is not None
+        )
+
+        if not IsCompound:
+            cat = cat.T
+
+        for Iid in range(Nid)[1:]:
+            FileName = CatFileTemplate % (CatName, FileID[Iid])
+            DataName = htmTemplate % ID_matlab[Iid]
+
+            CatNew = class_HDF5.HDF5(
+                root_to_data + CatDir + '/' + FileName
+            ).load(DataName, numpy_array=True)
+
+            if IsCompound:
+                cat = np.concatenate((cat, CatNew))
+            else:
+                cat = np.vstack((cat, CatNew.T))
+
+        if IsCompound:
+            FieldNames = cat.dtype.names
+            D = celestial.sphere_distance_fast(
+                RA,
+                Dec,
+                cat[FieldNames[ColRa]],
+                cat[FieldNames[ColDec]]
+            )
+            cat_onlycone = cat[D < Radius]
+        else:
+            D = celestial.sphere_distance_fast(
+                RA,
+                Dec,
+                cat[:,ColRa],
+                cat[:,ColDec]
+            )
+            cat_onlycone = cat[D < Radius,:]
 
     ### a colomne with the cell names:
     if cat_onlycone.ndim>1:
